@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Dimensions,
@@ -8,8 +8,11 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
+  LayoutAnimation,
   Easing
 } from 'react-native';
+import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
 
 var noop = () => {};
 
@@ -33,7 +36,16 @@ function Rect(x, y, width, height) {
   this.height = height;
 }
 
-var Popover = React.createClass({
+function isDifferentRect(rect1, rect2) {
+  return (
+    rect1.x != rect2.x ||
+    rect1.y != rect2.y ||
+    rect1.width != rect2.width ||
+    rect1.height != rect2.height
+  );
+}
+
+var Popover = createReactClass({
   propTypes: {
     isVisible: PropTypes.bool,
     onClose: PropTypes.func,
@@ -232,6 +244,26 @@ var Popover = React.createClass({
       } else {
         this._startAnimation({show: false});
       }
+    }
+  },
+  componentDidUpdate(prevProps, prevState) {
+    var {
+      isVisible,
+    } = this.props;
+
+    if (isVisible && prevProps.isVisible &&
+      (isDifferentRect(prevProps.fromRect, this.props.fromRect) || isDifferentRect(prevProps.displayArea, this.props.displayArea))) {
+      var geom = this.computeGeometry({contentSize: this.props.displayArea});
+
+      const CustomLayoutLinear = {
+        duration: 150,
+        update: {
+          type: LayoutAnimation.Types.linear,
+        }
+      };
+      LayoutAnimation.configureNext(CustomLayoutLinear);
+
+      this.setState({...geom});
     }
   },
   _startAnimation({show}) {
