@@ -48,6 +48,7 @@ function isDifferentRect(rect1, rect2) {
 var Popover = createReactClass({
   propTypes: {
     isVisible: PropTypes.bool,
+    shouldRetain: PropTypes.bool,
     onClose: PropTypes.func,
   },
   getInitialState() {
@@ -67,6 +68,7 @@ var Popover = createReactClass({
   getDefaultProps() {
     return {
       isVisible: false,
+      shouldRetain: false,
       displayArea: new Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
       arrowSize: DEFAULT_ARROW_SIZE,
       placement: 'auto',
@@ -356,7 +358,7 @@ var Popover = createReactClass({
     }
   },
   render() {
-    if (!this.props.isVisible && !this.state.isTransitioning) {
+    if (!this.props.isVisible && !this.state.isTransitioning && !this.props.shouldRetain) {
         return null;
     }
 
@@ -374,16 +376,18 @@ var Popover = createReactClass({
     arrowTransform.unshift({rotate: this.getArrowRotation(placement)});
     arrowStyle = [...arrowStyle, {transform: arrowTransform}];
 
+    const invisibleStyle = (!this.props.isVisible && !this.state.isTransitioning) ? {width: 0, height: 0, overflow: 'hidden'} : {};
+
     return (
       <TouchableWithoutFeedback onPress={this.props.onClose}>
-        <View style={[styles.container, contentSizeAvailable && styles.containerVisible ]}>
+        <View style={[styles.container, contentSizeAvailable && styles.containerVisible, invisibleStyle ]}>
           <Animated.View style={[styles.background, ...extendedStyles.background]}/>
           <Animated.View style={[styles.popover, {
             top: popoverOrigin.y,
             left: popoverOrigin.x,
             }, ...extendedStyles.popover]}>
             <Animated.View style={arrowStyle}/>
-            <Animated.View ref='content' onLayout={this.measureContent} style={contentStyle}>
+            <Animated.View ref='content' onLayout={this.measureContent} style={[contentStyle, invisibleStyle]}>
               {this.props.children}
             </Animated.View>
           </Animated.View>
