@@ -82,7 +82,7 @@ var Popover = createReactClass({
 
     var isAwaitingShow = this.state.isAwaitingShow;
     this.setState(Object.assign(geom,
-      {contentSize, isAwaitingShow: undefined}), () => {
+      {contentSize, isAwaitingShow: false}), () => {
       // Once state is set, call the showHandler so it can access all the geometry
       // from the state
       isAwaitingShow && this._startAnimation({show: true});
@@ -237,8 +237,8 @@ var Popover = createReactClass({
     var {
       isVisible,
     } = this.props;
-
-    if (willBeVisible !== isVisible) {
+    
+    if (willBeVisible != isVisible) {
       if (willBeVisible) {
         // We want to start the show animation only when contentSize is known
         // so that we can have some logic depending on the geometry
@@ -285,19 +285,20 @@ var Popover = createReactClass({
     var commonConfig = {
       duration: animDuration,
       easing: show ? Easing.out(Easing.back()) : Easing.inOut(Easing.quad),
+      useNativeDriver: true
     }
 
     Animated.parallel([
+      Animated.timing(values.scale, {
+        toValue: show ? 1 : 0,
+        ...commonConfig,
+      }),
       Animated.timing(values.fade, {
         toValue: show ? 1 : 0,
         ...commonConfig,
       }),
       Animated.timing(values.translate, {
         toValue: show ? new Point(0, 0) : translateOrigin,
-        ...commonConfig,
-      }),
-      Animated.timing(values.scale, {
-        toValue: show ? 1 : 0,
         ...commonConfig,
       })
     ]).start(doneCallback);
@@ -379,7 +380,11 @@ var Popover = createReactClass({
     const invisibleStyle = (!this.props.isVisible && !this.state.isTransitioning) ? {width: 0, height: 0, overflow: 'hidden'} : {};
 
     return (
-      <TouchableWithoutFeedback onPress={this.props.onClose}>
+      <TouchableWithoutFeedback onPress={e => {
+        if (!this.state.isTransitioning) {
+          this.props.onClose(e);
+        }
+      }}>
         <View style={[styles.container, contentSizeAvailable && styles.containerVisible, invisibleStyle ]}>
           <Animated.View style={[styles.background, ...extendedStyles.background]}/>
           <Animated.View style={[styles.popover, {
@@ -387,7 +392,7 @@ var Popover = createReactClass({
             left: popoverOrigin.x,
             }, ...extendedStyles.popover]}>
             <Animated.View style={arrowStyle}/>
-            <Animated.View ref='content' onLayout={this.measureContent} style={[contentStyle, invisibleStyle]}>
+            <Animated.View ref='content' onLayout={this.measureContent} style={[invisibleStyle, contentStyle]}>
               {this.props.children}
             </Animated.View>
           </Animated.View>
@@ -420,12 +425,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   popover: {
-    backgroundColor: 'transparent',
     position: 'absolute',
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 2},
-    shadowRadius: 2,
-    shadowOpacity: 0.8,
   },
   content: {
     borderRadius: 3,
