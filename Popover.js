@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
   LayoutAnimation,
+  Platform,
   Easing
 } from 'react-native';
 import createReactClass from 'create-react-class';
@@ -237,7 +238,7 @@ var Popover = createReactClass({
     var {
       isVisible,
     } = this.props;
-    
+
     if (willBeVisible != isVisible) {
       if (willBeVisible) {
         // We want to start the show animation only when contentSize is known
@@ -285,7 +286,7 @@ var Popover = createReactClass({
     var commonConfig = {
       duration: animDuration,
       easing: show ? Easing.out(Easing.back()) : Easing.inOut(Easing.quad),
-      useNativeDriver: true
+      useNativeDriver: Platform.OS === 'ios', // this config has bug on Android
     }
 
     Animated.parallel([
