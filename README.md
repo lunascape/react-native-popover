@@ -1,4 +1,15 @@
-## react-native-popover
+A## react-native-popover
+
+---
+
+## This is very old module and has not been updated.
+Please use [react-native-modal-popover](https://www.npmjs.com/package/react-native-modal-popover) as an alternative.
+
+Usage is the same as ‘react-native-popover‘.
+
+It is compatible with iOS and Android.
+
+---
 
 [![npm version](http://img.shields.io/npm/v/react-native-popover.svg?style=flat-square)](https://npmjs.org/package/react-native-popover "View this project on npm")
 [![npm version](http://img.shields.io/npm/dm/react-native-popover.svg?style=flat-square)](https://npmjs.org/package/react-native-popover "View this project on npm")
